@@ -95,8 +95,7 @@ jobs:
     lookup-only: # optional, default is false
     # Run the post step to save the cache even if another step before fails
     save-always: # optional, default is false
-          .sarif
-            - name: Cache
+           Cache
   uses: actions/cache@v5.0.1
   with:
     # A list of files, directories, and wildcard patterns to cache and restore
