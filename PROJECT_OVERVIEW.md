@@ -15,7 +15,7 @@ The codebase is organized as an Elixir umbrella project, where specialized servi
 ## Technology Stack
 *   **Backend**: Elixir 1.19 (OTP 27) and Erlang.
 *   **Database**: PostgreSQL (v10.3+).
-*   **Frontend**: A hybrid approach using server-side rendered Phoenix views with client-side enhancements via **React**, **Redux**, and **Bootstrap 4**. Assets are bundled using **Webpack**.
+*   **Frontend**: A hybrid approach using server-side rendered Phoenix views with client-side enhancements via **jQuery**, **Redux**, and **Bootstrap 4**. Assets are bundled using **Webpack**.
 *   **APIs**: REST (v1 & v2), RPC (JSON-RPC), and GraphQL.
 
 ## Key Features
