@@ -5,7 +5,7 @@ This document provides a high-level explanation of the Blockscout codebase.
 ## Architecture: Elixir Umbrella Project
 The codebase is organized as an Elixir umbrella project, where specialized services work together:
 
-*   **`block_scout_web`**: The user-facing layer. Built with the **Phoenix Framework**, it serves the web UI and exposes multiple API interfaces (REST v1/v2, an Etherscan-compatible RPC API, and a GraphQL API via Absinthe).
+*   **`block_scout_web`**: The user-facing layer. Built with the **Phoenix Framework**, it serves the web UI and exposes multiple API interfaces (REST v1/v2, an Etherscan-compatible API, and a GraphQL API via Absinthe).
 *   **`explorer`**: The core domain layer. It handles the business logic, manages the **PostgreSQL** database schemas, and provides the data access layer used by the web UI.
 *   **`indexer`**: The ETL (Extract, Transform, Load) engine. It fetches raw data from blockchain nodes, transforms it into a searchable format, and persists it via the `explorer` application.
 *   **`ethereum_jsonrpc`**: The communication bridge. It provides adapters and transport logic for interacting with various Ethereum node clients like Geth, Besu, and Nethermind.
