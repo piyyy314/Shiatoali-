@@ -124,11 +124,13 @@ defmodule BlockScoutWeb.Mixfile do
       {:number, "~> 1.0.1"},
       {:phoenix, "== 1.8.3"},
       {:phoenix_ecto, "~> 4.1"},
+      {:phoenix_view, "~> 2.0"},
       {:phoenix_html, "== 4.3.0"},
       {:phoenix_html_helpers, "~> 1.0"},
       {:phoenix_live_reload, "~> 1.6", only: [:dev]},
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_pubsub, "~> 2.0"},
+      {:phoenix_view, "~> 2.0"},
       {:prometheus_ex, "~> 5.0.0", override: true},
       # use `:cowboy` for WebServer with `:plug`
       {:plug_cowboy, "~> 2.2"},
