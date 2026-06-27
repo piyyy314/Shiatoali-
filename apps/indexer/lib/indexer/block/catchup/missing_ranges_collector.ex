@@ -352,7 +352,7 @@ defmodule Indexer.Block.Catchup.MissingRangesCollector do
     to = max(min_fetched_block_number - missing_ranges_batch_size(), first_block())
 
     if from >= to do
-      {to, Chain.missing_block_number_ranges(from..to)}
+      {to, Chain.missing_block_number_ranges(from..to//-1)}
     else
       {min_fetched_block_number, []}
     end
@@ -363,7 +363,7 @@ defmodule Indexer.Block.Catchup.MissingRangesCollector do
     from = min(max_fetched_block_number + missing_ranges_batch_size(), last_block() - 1)
 
     if from >= to do
-      {from, Chain.missing_block_number_ranges(from..to)}
+      {from, Chain.missing_block_number_ranges(from..to//-1)}
     else
       {max_fetched_block_number, []}
     end

@@ -4714,3 +4714,9 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "truffle flattener"
 msgstr ""
+
+msgid "We're indexing this chain right now. Some of the counts may be inaccurate."
+msgstr "We're indexing this chain right now. Some of the counts may be inaccurate."
+
+msgid "Ether"
+msgstr "Ether"
