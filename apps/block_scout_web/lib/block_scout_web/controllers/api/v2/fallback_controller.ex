@@ -1,7 +1,5 @@
 defmodule BlockScoutWeb.API.V2.FallbackController do
-  use Phoenix.Controller,
-    formats: [:html, :json, :csv, :js],
-    layouts: [html: BlockScoutWeb.LayoutView]
+  use Phoenix.Controller, formats: [html: "View", json: "View", csv: "View", js: "View"], layouts: [html: BlockScoutWeb.LayoutView]
 
   require Logger
 
