@@ -273,7 +273,7 @@ defmodule Indexer.Fetcher.Optimism.TransactionBatch do
 
             {:ok, new_incomplete_channels, batches, sequences, blobs, last_block_hash} =
               get_transaction_batches(
-                Range.new(chunk_start, chunk_end),
+                Range.new(chunk_start, chunk_end, 1),
                 batch_inbox,
                 batch_submitter,
                 {genesis_block_l2, block_duration},

@@ -165,7 +165,8 @@ defmodule Indexer.Fetcher.Optimism.Interop.MessageFailed do
 
         Helper.log_blocks_chunk_handling(chunk_start, chunk_end, start_block_number, end_block_number, nil, :L2)
 
-        failed_relay_count = handle_failed_relays(Range.new(chunk_start, chunk_end), json_rpc_named_arguments, chain_id)
+        failed_relay_count =
+          handle_failed_relays(Range.new(chunk_start, chunk_end, 1), json_rpc_named_arguments, chain_id)
 
         Helper.log_blocks_chunk_handling(
           chunk_start,

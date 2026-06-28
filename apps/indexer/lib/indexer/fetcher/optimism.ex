@@ -597,7 +597,7 @@ defmodule Indexer.Fetcher.Optimism do
         start_block_number
       end
 
-    new_realtime_range = Range.new(start_block_number_updated, end_block_number)
+    new_realtime_range = Range.new(start_block_number_updated, end_block_number, 1)
 
     if mode == :realtime do
       Logger.info("The current realtime range is #{inspect(new_realtime_range)}. Starting to handle that...")
