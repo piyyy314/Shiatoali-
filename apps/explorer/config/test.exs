@@ -6,10 +6,12 @@ config :bcrypt_elixir, log_rounds: 4
 database_url = ConfigHelper.parse_url_env_var("TEST_DATABASE_URL")
 database = if database_url, do: nil, else: "explorer_test"
 hostname = if database_url, do: nil, else: "localhost"
+username = System.get_env("PGUSER") || "postgres"
 
 # Configure your database
 config :explorer, Explorer.Repo,
   database: database,
+  username: username,
   hostname: hostname,
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
@@ -22,6 +24,7 @@ config :explorer, Explorer.Repo,
 
 config :explorer, Explorer.Repo.EventNotifications,
   database: database,
+  username: username,
   hostname: hostname,
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
@@ -35,6 +38,7 @@ config :explorer, Explorer.Repo.EventNotifications,
 # Configure API database
 config :explorer, Explorer.Repo.Replica1,
   database: database,
+  username: username,
   hostname: hostname,
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
@@ -56,6 +60,7 @@ account_database = if account_database_url, do: nil, else: "explorer_test_accoun
 # Configure API database
 config :explorer, Explorer.Repo.Account,
   database: account_database,
+  username: username,
   hostname: hostname,
   url: account_database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
@@ -88,6 +93,7 @@ for repo <- [
     ] do
   config :explorer, repo,
     database: database,
+    username: username,
     hostname: hostname,
     url: database_url,
     pool: Ecto.Adapters.SQL.Sandbox,
@@ -101,6 +107,7 @@ end
 
 config :explorer, Explorer.Repo.PolygonZkevm,
   database: database,
+  username: username,
   hostname: hostname,
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,

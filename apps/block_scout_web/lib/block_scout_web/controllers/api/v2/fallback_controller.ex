@@ -1,6 +1,5 @@
 defmodule BlockScoutWeb.API.V2.FallbackController do
-  use Phoenix.Controller, namespace: BlockScoutWeb
-
+  use BlockScoutWeb, :controller
   require Logger
 
   alias BlockScoutWeb.Account.API.V2.UserView
