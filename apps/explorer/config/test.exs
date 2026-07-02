@@ -9,6 +9,7 @@ hostname = if database_url, do: nil, else: "localhost"
 
 # Configure your database
 config :explorer, Explorer.Repo,
+  username: System.get_env("PGUSER") || "postgres",
   database: database,
   hostname: hostname,
   url: database_url,
@@ -21,6 +22,7 @@ config :explorer, Explorer.Repo,
   log: false
 
 config :explorer, Explorer.Repo.EventNotifications,
+  username: System.get_env("PGUSER") || "postgres",
   database: database,
   hostname: hostname,
   url: database_url,
@@ -34,6 +36,7 @@ config :explorer, Explorer.Repo.EventNotifications,
 
 # Configure API database
 config :explorer, Explorer.Repo.Replica1,
+  username: System.get_env("PGUSER") || "postgres",
   database: database,
   hostname: hostname,
   url: database_url,
@@ -55,6 +58,7 @@ account_database = if account_database_url, do: nil, else: "explorer_test_accoun
 
 # Configure API database
 config :explorer, Explorer.Repo.Account,
+  username: System.get_env("PGUSER") || "postgres",
   database: account_database,
   hostname: hostname,
   url: account_database_url,
@@ -87,6 +91,7 @@ for repo <- [
       Explorer.Repo.Neon
     ] do
   config :explorer, repo,
+    username: System.get_env("PGUSER") || "postgres",
     database: database,
     hostname: hostname,
     url: database_url,
@@ -100,6 +105,7 @@ for repo <- [
 end
 
 config :explorer, Explorer.Repo.PolygonZkevm,
+  username: System.get_env("PGUSER") || "postgres",
   database: database,
   hostname: hostname,
   url: database_url,

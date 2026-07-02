@@ -25,8 +25,12 @@ defmodule BlockScoutWeb.API.V1.HealthControllerTest do
     current_block_number = 100_500
     current_block_number_hex = integer_to_quantity(current_block_number)
 
-    expect(EthereumJSONRPC.Mox, :json_rpc, fn %{method: "eth_blockNumber"}, _options ->
-      {:ok, current_block_number_hex}
+    stub(EthereumJSONRPC.Mox, :json_rpc, fn
+      %{method: "eth_blockNumber"}, _options ->
+        {:ok, current_block_number_hex}
+
+      _requests, _options ->
+        {:error, :not_implemented}
     end)
 
     on_exit(fn ->
