@@ -11,6 +11,7 @@ hostname = if database_url, do: nil, else: "localhost"
 config :explorer, Explorer.Repo,
   database: database,
   hostname: hostname,
+  username: System.get_env("PGUSER") || "postgres",
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
@@ -23,6 +24,7 @@ config :explorer, Explorer.Repo,
 config :explorer, Explorer.Repo.EventNotifications,
   database: database,
   hostname: hostname,
+  username: System.get_env("PGUSER") || "postgres",
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
@@ -36,6 +38,7 @@ config :explorer, Explorer.Repo.EventNotifications,
 config :explorer, Explorer.Repo.Replica1,
   database: database,
   hostname: hostname,
+  username: System.get_env("PGUSER") || "postgres",
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
@@ -57,6 +60,7 @@ account_database = if account_database_url, do: nil, else: "explorer_test_accoun
 config :explorer, Explorer.Repo.Account,
   database: account_database,
   hostname: hostname,
+  username: System.get_env("PGUSER") || "postgres",
   url: account_database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
@@ -89,6 +93,7 @@ for repo <- [
   config :explorer, repo,
     database: database,
     hostname: hostname,
+    username: System.get_env("PGUSER") || "postgres",
     url: database_url,
     pool: Ecto.Adapters.SQL.Sandbox,
     # Default of `5_000` was too low for `BlockFetcher` test
@@ -102,6 +107,7 @@ end
 config :explorer, Explorer.Repo.PolygonZkevm,
   database: database,
   hostname: hostname,
+  username: System.get_env("PGUSER") || "postgres",
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
