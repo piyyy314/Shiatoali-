@@ -23,14 +23,22 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC721Test do
     end
 
     test "imports token instances" do
-      stub(EthereumJSONRPC.Mox, :json_rpc, fn requests, _options ->
-        {:ok,
-         Enum.map(requests, fn %{id: id} ->
+      stub(EthereumJSONRPC.Mox, :json_rpc, fn
+        requests, _options when is_list(requests) ->
+          {:ok,
+           Enum.map(requests, fn %{id: id} ->
+             %{
+               id: id,
+               error: %{code: -32000, message: "execution reverted"}
+             }
+           end)}
+
+        request, _options when is_map(request) ->
+          {:ok,
            %{
-             id: id,
+             id: request.id,
              error: %{code: -32000, message: "execution reverted"}
-           }
-         end)}
+           }}
       end)
 
       for x <- 0..3 do
@@ -65,14 +73,22 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC721Test do
     end
 
     test "imports token instances with low tokens queue size", %{initial_env: initial_env} do
-      stub(EthereumJSONRPC.Mox, :json_rpc, fn requests, _options ->
-        {:ok,
-         Enum.map(requests, fn %{id: id} ->
+      stub(EthereumJSONRPC.Mox, :json_rpc, fn
+        requests, _options when is_list(requests) ->
+          {:ok,
+           Enum.map(requests, fn %{id: id} ->
+             %{
+               id: id,
+               error: %{code: -32000, message: "execution reverted"}
+             }
+           end)}
+
+        request, _options when is_map(request) ->
+          {:ok,
            %{
-             id: id,
+             id: request.id,
              error: %{code: -32000, message: "execution reverted"}
-           }
-         end)}
+           }}
       end)
 
       tokens =
@@ -152,6 +168,24 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC721Test do
     end
 
     test "takes into account the last processed token address hash" do
+      stub(EthereumJSONRPC.Mox, :json_rpc, fn
+        requests, _options when is_list(requests) ->
+          {:ok,
+           Enum.map(requests, fn %{id: id} ->
+             %{
+               id: id,
+               error: %{code: -32000, message: "execution reverted"}
+             }
+           end)}
+
+        request, _options when is_map(request) ->
+          {:ok,
+           %{
+             id: request.id,
+             error: %{code: -32000, message: "execution reverted"}
+           }}
+      end)
+
       tokens =
         for x <- 0..5 do
           erc_721_token = insert(:token, type: "ERC-721")
