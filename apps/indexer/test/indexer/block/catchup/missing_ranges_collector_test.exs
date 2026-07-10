@@ -107,7 +107,7 @@ defmodule Indexer.Block.Catchup.MissingRangesCollectorTest do
     assert MissingRangesCollector.parse_block_ranges("1..5,3..5,2qw1..12,10..11a,,asd..qwe,10..latest") ==
              {:infinite_ranges, [1..5], 9}
 
-    assert MissingRangesCollector.parse_block_ranges("latest..123,,fvdskvjglav!@#$%^&,2..1") == :no_ranges
+    assert MissingRangesCollector.parse_block_ranges("latest..123,,fvdskvjglav!@#$%^&,2..1//-1") == :no_ranges
 
     assert MissingRangesCollector.parse_block_ranges("10..20,5..15,18..25,35..40,30..50,100..latest,150..200") ==
              {:infinite_ranges, [5..25, 30..50], 99}

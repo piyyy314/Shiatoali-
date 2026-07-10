@@ -81,12 +81,12 @@ defmodule Explorer.Chain.AddressTest do
     # flaky test
     # test "with top addresses in order with matching value" do
     #   test_hashes =
-    #     4..0
+    #     4..0//-1
     #     |> Enum.map(&Explorer.Chain.Hash.cast(Explorer.Chain.Hash.Address, &1))
     #     |> Enum.map(&elem(&1, 1))
 
     #   tail =
-    #     4..1
+    #     4..1//-1
     #     |> Enum.map(&insert(:address, fetched_coin_balance: &1, hash: Enum.fetch!(test_hashes, &1 - 1)))
     #     |> Enum.map(& &1.hash)
 
@@ -104,12 +104,12 @@ defmodule Explorer.Chain.AddressTest do
     # flaky test
     # test "paginates addresses" do
     #   test_hashes =
-    #     4..0
+    #     4..0//-1
     #     |> Enum.map(&Explorer.Chain.Hash.cast(Explorer.Chain.Hash.Address, &1))
     #     |> Enum.map(&elem(&1, 1))
 
     #   result =
-    #     4..1
+    #     4..1//-1
     #     |> Enum.map(&insert(:address, fetched_coin_balance: &1, hash: Enum.fetch!(test_hashes, &1 - 1)))
     #     |> Enum.map(& &1.hash)
 
