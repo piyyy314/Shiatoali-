@@ -21,8 +21,8 @@ defmodule BlockScoutWeb do
   def controller do
     quote do
       use Phoenix.Controller,
-        formats: [:html, :json, :csv],
-        layouts: [html: BlockScoutWeb.LayoutView]
+        formats: [html: "View", json: "View", csv: "View"],
+        namespace: BlockScoutWeb
 
       import BlockScoutWeb.Controller
       import BlockScoutWeb.Router.Helpers
@@ -50,8 +50,7 @@ defmodule BlockScoutWeb do
     quote do
       use Phoenix.View,
         root: "lib/block_scout_web/templates",
-        formats: [:html, :json, :csv],
-        layouts: [html: BlockScoutWeb.LayoutView]
+        namespace: BlockScoutWeb
 
       # Use all HTML functionality (forms, tags, etc)
       import Phoenix.HTML

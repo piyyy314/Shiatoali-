@@ -569,7 +569,7 @@ defmodule Indexer.Block.Realtime.FetcherTest do
                   transactions: [%Transaction{hash: _transaction_hash}]
                 },
                 errors: []
-              }} = Indexer.Block.Fetcher.fetch_and_import_range(block_fetcher, 3_946_079..3_946_080)
+              }} = Indexer.Block.Fetcher.fetch_and_import_range(block_fetcher, 3_946_079..3//-1_946_080)
 
       if chain_identity() != {:optimism, :celo} do
         assert [
@@ -829,7 +829,7 @@ defmodule Indexer.Block.Realtime.FetcherTest do
                   transactions: [%Transaction{hash: _transaction_hash}]
                 },
                 errors: []
-              }} = Indexer.Block.Fetcher.fetch_and_import_range(block_fetcher, 3_946_079..3_946_080)
+              }} = Indexer.Block.Fetcher.fetch_and_import_range(block_fetcher, 3_946_079..3//-1_946_080)
 
       if chain_identity() != {:optimism, :celo} do
         assert [
@@ -1130,7 +1130,7 @@ defmodule Indexer.Block.Realtime.FetcherTest do
                     ]
                   },
                   errors: []
-                }} = Indexer.Block.Fetcher.fetch_and_import_range(block_fetcher, 3_946_079..3_946_080)
+                }} = Indexer.Block.Fetcher.fetch_and_import_range(block_fetcher, 3_946_079..3//-1_946_080)
 
         validator_from_db = Repo.get!(Explorer.Chain.Stability.Validator, validator_1.address_hash)
         assert validator_from_db.blocks_validated == blocks_validated_1

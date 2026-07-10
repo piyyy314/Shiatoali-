@@ -460,7 +460,7 @@ defmodule Explorer.Utility.MissingBlockRangeTest do
       Repo.insert!(%MissingBlockRange{from_number: 45, to_number: 30, priority: 1})
       Repo.insert!(%MissingBlockRange{from_number: 25, to_number: 20, priority: nil})
 
-      batch = [95..80//-1, 60..58//-1, 42..35//-1, 30..19//-1]
+      batch = [95..8//-10//-1, 60..5//-18//-1, 42..3//-15//-1, 30..1//-19//-1]
 
       MissingBlockRange.clear_batch(batch)
 
