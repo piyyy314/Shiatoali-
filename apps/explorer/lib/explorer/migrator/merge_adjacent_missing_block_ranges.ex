@@ -46,6 +46,7 @@ defmodule Explorer.Migrator.MergeAdjacentMissingBlockRanges do
       Enum.reduce(ranges_batch, {[], [], []}, fn range, {priority_acc, non_priority_acc, delete_acc} ->
         step = if range.from_number <= range.to_number, do: 1, else: -1
         r = Range.new(range.from_number, range.to_number, step)
+
         if is_nil(range.priority) do
           {priority_acc, [r | non_priority_acc], [range.id | delete_acc]}
         else

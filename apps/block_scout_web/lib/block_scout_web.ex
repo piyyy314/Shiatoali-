@@ -23,7 +23,7 @@ defmodule BlockScoutWeb do
       use Phoenix.Controller,
         formats: [html: "View", json: "View", csv: "View"]
 
-      plug :put_layout, html: BlockScoutWeb.LayoutView
+      plug(:put_layout, html: BlockScoutWeb.LayoutView)
 
       import BlockScoutWeb.Controller
       import BlockScoutWeb.Router.Helpers
