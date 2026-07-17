@@ -242,7 +242,8 @@ defmodule Explorer.Utility.MissingBlockRange do
   @spec delete_less_priority_range(__MODULE__.t(), integer() | nil) :: any()
   defp delete_less_priority_range(range, priority) do
     if is_nil(range.priority) && not is_nil(priority) do
-      delete_range(range.from_number..range.to_number)
+      step = if range.from_number <= range.to_number, do: 1, else: -1
+      delete_range(Range.new(range.from_number, range.to_number, step))
     end
   end
 
@@ -448,16 +449,14 @@ defmodule Explorer.Utility.MissingBlockRange do
       insert_or_update_adjacent_ranges(from, to, priority, :both)
     else
       full_range_map_set =
-        from
-        |> Range.new(to)
+        Range.new(from, to, if(from <= to, do: 1, else: -1))
         |> Enum.to_list()
         |> MapSet.new()
 
       priority_ranges
       |> Enum.reduce(full_range_map_set, fn range, acc ->
         map_set =
-          range.from_number
-          |> Range.new(range.to_number)
+          Range.new(range.from_number, range.to_number, if(range.from_number <= range.to_number, do: 1, else: -1))
           |> Enum.to_list()
           |> MapSet.new()
 
@@ -472,7 +471,7 @@ defmodule Explorer.Utility.MissingBlockRange do
         else
           # credo:disable-for-next-line Credo.Check.Refactor.Nesting
           if end_range - num > 1 do
-            {[Range.new(start_range, end_range) | ranges], {num, num}}
+            {[Range.new(start_range, end_range, if(start_range <= end_range, do: 1, else: -1)) | ranges], {num, num}}
           else
             {ranges, {start_range, num}}
           end
@@ -480,7 +479,7 @@ defmodule Explorer.Utility.MissingBlockRange do
       end)
       |> then(fn {ranges, {start_range, end_range}} ->
         if not is_nil(start_range) && not is_nil(end_range) do
-          [Range.new(start_range, end_range) | ranges]
+          [Range.new(start_range, end_range, if(start_range <= end_range, do: 1, else: -1)) | ranges]
         else
           ranges
         end

@@ -44,10 +44,13 @@ defmodule Explorer.Migrator.MergeAdjacentMissingBlockRanges do
   def update_batch(ranges_batch) do
     {priority_ranges, non_priority_ranges, delete_ids} =
       Enum.reduce(ranges_batch, {[], [], []}, fn range, {priority_acc, non_priority_acc, delete_acc} ->
+        step = if range.from_number <= range.to_number, do: 1, else: -1
+        r = Range.new(range.from_number, range.to_number, step)
+
         if is_nil(range.priority) do
-          {priority_acc, [range.from_number..range.to_number | non_priority_acc], [range.id | delete_acc]}
+          {priority_acc, [r | non_priority_acc], [range.id | delete_acc]}
         else
-          {[range.from_number..range.to_number | priority_acc], non_priority_acc, [range.id | delete_acc]}
+          {[r | priority_acc], non_priority_acc, [range.id | delete_acc]}
         end
       end)
 
