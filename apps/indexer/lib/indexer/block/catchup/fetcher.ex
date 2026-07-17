@@ -296,13 +296,13 @@ defmodule Indexer.Block.Catchup.Fetcher do
       nil,
       fn
         number, nil ->
-          {:cont, number..number}
+          {:cont, number..number//-1}
 
         number, first..last//_ when number == last - 1 ->
-          {:cont, first..number}
+          {:cont, first..number//-1}
 
         number, range ->
-          {:cont, range, number..number}
+          {:cont, range, number..number//-1}
       end,
       fn range -> {:cont, range, nil} end
     )
