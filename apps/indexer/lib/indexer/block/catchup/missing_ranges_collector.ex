@@ -186,7 +186,10 @@ defmodule Indexer.Block.Catchup.MissingRangesCollector do
 
     ranges
     |> Enum.reverse()
-    |> Enum.flat_map(fn f..l//_ -> Chain.missing_block_number_ranges(l..f//-1) end)
+    |> Enum.flat_map(fn f..l//_ ->
+      step = if l <= f, do: 1, else: -1
+      Chain.missing_block_number_ranges(Range.new(l, f, step))
+    end)
     |> MissingBlockRange.save_batch()
 
     if not is_nil(max_fetched_block_number) do

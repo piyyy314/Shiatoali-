@@ -20,7 +20,10 @@ defmodule BlockScoutWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: BlockScoutWeb
+      use Phoenix.Controller,
+        formats: [html: "View", json: "View", csv: "View"]
+
+      plug :put_layout, html: BlockScoutWeb.LayoutView
 
       import BlockScoutWeb.Controller
       import BlockScoutWeb.Router.Helpers
