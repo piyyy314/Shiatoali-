@@ -40,7 +40,10 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC1155Test do
       # Mock the ERC-1155 uri() calls to return errors so instances get error field populated
       stub(EthereumJSONRPC.Mox, :json_rpc, fn
         [%{method: "eth_call"} | _] = requests, _options ->
-          {:ok, Enum.map(requests, fn %{id: id} -> %{id: id, error: %{code: -32015, message: "VM execution error"}} end)}
+          {:ok,
+           Enum.map(requests, fn %{id: id} ->
+             %{id: id, error: %{code: -32015, message: "VM execution error"}}
+           end)}
 
         requests, _options when is_list(requests) ->
           {:ok, Enum.map(requests, fn %{id: id} -> %{id: id, result: "0x"} end)}
