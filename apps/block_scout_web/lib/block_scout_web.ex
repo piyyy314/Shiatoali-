@@ -22,7 +22,7 @@ defmodule BlockScoutWeb do
     quote do
       use Phoenix.Controller, formats: [html: "View", json: "View"]
 
-      plug :put_layout, html: BlockScoutWeb.LayoutView
+      plug(:put_layout, html: {BlockScoutWeb.LayoutView, "app.html"})
 
       import BlockScoutWeb.Controller
       import BlockScoutWeb.Router.Helpers
