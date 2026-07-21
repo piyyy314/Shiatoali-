@@ -1,5 +1,7 @@
 defmodule BlockScoutWeb.API.HealthController do
-  use Phoenix.Controller, formats: [:json]
+  use Phoenix.Controller,
+    formats: [json: "View"],
+    namespace: BlockScoutWeb
 
   import Plug.Conn
 
