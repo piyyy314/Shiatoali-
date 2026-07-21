@@ -87,7 +87,7 @@
         _ -> Chain.indexed_ratio_internal_transactions()
         end %>
         <%= if not Chain.finished_indexing_from_ratio?(indexed_ratio) do %>
-          <div class="alert alert-warning text-center mb-0 p-3" data-seindexed_ratiolector="indexed-status">
+          <div class="alert alert-warning text-center mb-0 p-3" data-selector="indexed-status">
             <%= render BlockScoutWeb.CommonComponentsView, "_loading_spinner.html" %>
             <span data-indexed-ratio-blocks="<%= indexed_ratio_blocks %>" data-indexed-ratio="<%= indexed_ratio %>"></span>
             <%= gettext("- We're indexing this chain right now. Some of the counts may be inaccurate.") %>
@@ -99,9 +99,9 @@
       <%= if session && !session[:email_verified] do %>
         <p class="alert alert-warning" role="alert" style="margin-bottom: 0"><%= gettext("Please confirm your email address to use the My Account feature.") %> <%= gettext("A confirmation email was sent to") %> <a href="mailto:<%= session[:email] %>"><%=session[:email] %></a> <%= gettext "on sign up. Didn’t receive?" %> <a href="/api/account/v2/email/resend" class="ajax"><%= gettext "Resend verification email" %></a>.</p>
       <% else %>
-        <p class="alert alert-info" role="alert"><%= Map.get(@conn.private, :phoenix_flash) && Phoenix.Controller.get_flash(@conn, :info) %></p>
+        <p class="alert alert-info" role="alert"><%= Phoenix.Flash.get(@flash, :info) %></p>
       <% end %>
-      <p class="alert alert-danger" role="alert"><%= Map.get(@conn.private, :phoenix_flash) && Phoenix.Controller.get_flash(@conn, :error) %></p>
+      <p class="alert alert-danger" role="alert"><%= Phoenix.Flash.get(@flash, :error) %></p>
       <main class="js-ad-dependant-pt pt-5">
         <%= @inner_content %>
       </main>
