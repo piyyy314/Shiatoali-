@@ -17,7 +17,11 @@ defmodule Explorer.Chain.Health.Monitor do
   alias Explorer.Repo
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
+    if Application.get_env(:explorer, __MODULE__)[:enabled] == false do
+      :ignore
+    else
+      GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
+    end
   end
 
   @impl true
