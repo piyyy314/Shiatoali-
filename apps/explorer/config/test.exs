@@ -124,4 +124,6 @@ config :explorer, Explorer.Tags.AddressTag.Cataloger, enabled: false
 
 config :explorer, Explorer.Chain.Health.Monitor, enabled: false
 
+config :nft_media_handler, standalone_media_worker?: false
+
 config :tesla, adapter: Explorer.Mock.TeslaAdapter
