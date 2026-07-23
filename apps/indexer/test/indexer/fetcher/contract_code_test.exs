@@ -20,6 +20,17 @@ defmodule Indexer.Fetcher.ContractCodeTest do
   setup do
     start_supervised!({Task.Supervisor, name: Indexer.TaskSupervisor})
 
+    stub(EthereumJSONRPC.Mox, :json_rpc, fn
+      requests, _options when is_list(requests) ->
+        {:ok, Enum.map(requests, fn %{id: id} -> %{id: id, result: "0x"} end)}
+
+      %{id: id, method: "eth_blockNumber"}, _options ->
+        {:ok, %{id: id, result: "0x1"}}
+
+      request, _options when is_map(request) ->
+        {:ok, %{id: Map.get(request, :id, 0), result: "0x"}}
+    end)
+
     :ok
   end
 

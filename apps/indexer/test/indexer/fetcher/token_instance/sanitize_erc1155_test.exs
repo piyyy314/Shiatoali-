@@ -10,6 +10,21 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC1155Test do
   setup :set_mox_global
 
   describe "sanitizer test" do
+    setup do
+      stub(EthereumJSONRPC.Mox, :json_rpc, fn
+        requests, _options when is_list(requests) ->
+          {:ok, Enum.map(requests, fn %{id: id} -> %{id: id, result: "0x"} end)}
+
+        %{id: id, method: "eth_blockNumber"}, _options ->
+          {:ok, %{id: id, result: "0x1"}}
+
+        request, _options when is_map(request) ->
+          {:ok, %{id: Map.get(request, :id, 0), result: "0x"}}
+      end)
+
+      :ok
+    end
+
     test "imports token instances" do
       for i <- 0..3 do
         token = insert(:token, type: "ERC-1155")
@@ -23,15 +38,21 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC1155Test do
       end
 
       # Mock the ERC-1155 uri() calls to return errors so instances get error field populated
-      EthereumJSONRPC.Mox
-      |> expect(:json_rpc, fn _requests, _options ->
-        {:ok,
-         [
-           %{id: 0, error: %{code: -32015, message: "VM execution error"}},
-           %{id: 1, error: %{code: -32015, message: "VM execution error"}},
-           %{id: 2, error: %{code: -32015, message: "VM execution error"}},
-           %{id: 3, error: %{code: -32015, message: "VM execution error"}}
-         ]}
+      stub(EthereumJSONRPC.Mox, :json_rpc, fn
+        [%{method: "eth_call"} | _] = requests, _options ->
+          {:ok,
+           Enum.map(requests, fn %{id: id} ->
+             %{id: id, error: %{code: -32015, message: "VM execution error"}}
+           end)}
+
+        requests, _options when is_list(requests) ->
+          {:ok, Enum.map(requests, fn %{id: id} -> %{id: id, result: "0x"} end)}
+
+        %{id: id, method: "eth_blockNumber"}, _options ->
+          {:ok, %{id: id, result: "0x1"}}
+
+        request, _options when is_map(request) ->
+          {:ok, %{id: Map.get(request, :id, 0), result: "0x"}}
       end)
 
       assert [] = Repo.all(Instance)
