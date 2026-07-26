@@ -6,11 +6,13 @@ config :bcrypt_elixir, log_rounds: 4
 database_url = ConfigHelper.parse_url_env_var("TEST_DATABASE_URL")
 database = if database_url, do: nil, else: "explorer_test"
 hostname = if database_url, do: nil, else: "localhost"
+username = System.get_env("PGUSER") || "postgres"
 
 # Configure your database
 config :explorer, Explorer.Repo,
   database: database,
   hostname: hostname,
+  username: username,
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
@@ -23,6 +25,7 @@ config :explorer, Explorer.Repo,
 config :explorer, Explorer.Repo.EventNotifications,
   database: database,
   hostname: hostname,
+  username: username,
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
@@ -36,6 +39,7 @@ config :explorer, Explorer.Repo.EventNotifications,
 config :explorer, Explorer.Repo.Replica1,
   database: database,
   hostname: hostname,
+  username: username,
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
@@ -57,6 +61,7 @@ account_database = if account_database_url, do: nil, else: "explorer_test_accoun
 config :explorer, Explorer.Repo.Account,
   database: account_database,
   hostname: hostname,
+  username: username,
   url: account_database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
@@ -89,6 +94,7 @@ for repo <- [
   config :explorer, repo,
     database: database,
     hostname: hostname,
+    username: username,
     url: database_url,
     pool: Ecto.Adapters.SQL.Sandbox,
     # Default of `5_000` was too low for `BlockFetcher` test
@@ -102,6 +108,7 @@ end
 config :explorer, Explorer.Repo.PolygonZkevm,
   database: database,
   hostname: hostname,
+  username: username,
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
@@ -116,3 +123,5 @@ config :explorer, Explorer.Chain.Fetcher.FetchValidatorInfoOnDemand, enabled: fa
 config :explorer, Explorer.Tags.AddressTag.Cataloger, enabled: false
 
 config :tesla, adapter: Explorer.Mock.TeslaAdapter
+
+config :explorer, Explorer.Chain.Health.Monitor, enabled: false

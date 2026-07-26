@@ -71,7 +71,6 @@ defmodule Explorer.Application do
       Supervisor.child_spec({Task.Supervisor, name: Explorer.WETHMigratorSupervisor}, id: WETHMigratorSupervisor),
       Explorer.SmartContract.SolcDownloader,
       Explorer.SmartContract.VyperDownloader,
-      Explorer.Chain.Health.Monitor,
       {Registry, keys: :duplicate, name: Registry.ChainEvents, id: Registry.ChainEvents},
       {Admin.Recovery, [[], [name: Admin.Recovery]]},
       Accounts,
@@ -329,6 +328,7 @@ defmodule Explorer.Application do
         Explorer.Migrator.SwitchPendingOperations,
         configure_mode_dependent_process(Explorer.Utility.RateLimiter, :api),
         Hammer.child_for_supervisor() |> configure_mode_dependent_process(:api),
+        configure_health_monitor(),
         # keep at the end
         configure_libcluster()
       ]
@@ -510,4 +510,12 @@ defmodule Explorer.Application do
 
   defp libcluster,
     do: {Cluster.Supervisor, [Application.get_env(:libcluster, :topologies), [name: Explorer.ClusterSupervisor]]}
+
+  defp configure_health_monitor do
+    if Application.get_env(:explorer, Explorer.Chain.Health.Monitor, [])[:enabled] == false do
+      []
+    else
+      [Explorer.Chain.Health.Monitor]
+    end
+  end
 end
