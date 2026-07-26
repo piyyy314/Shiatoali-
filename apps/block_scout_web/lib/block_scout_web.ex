@@ -49,8 +49,7 @@ defmodule BlockScoutWeb do
   def view do
     quote do
       use Phoenix.View,
-        root: "lib/block_scout_web/templates",
-        namespace: BlockScoutWeb
+        root: "lib/block_scout_web/templates"
 
       # Use all HTML functionality (forms, tags, etc)
       import Phoenix.HTML

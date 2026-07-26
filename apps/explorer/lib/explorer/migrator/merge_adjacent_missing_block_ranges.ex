@@ -44,10 +44,14 @@ defmodule Explorer.Migrator.MergeAdjacentMissingBlockRanges do
   def update_batch(ranges_batch) do
     {priority_ranges, non_priority_ranges, delete_ids} =
       Enum.reduce(ranges_batch, {[], [], []}, fn range, {priority_acc, non_priority_acc, delete_acc} ->
+        # range.from_number is always greater than or equal to range.to_number in MissingBlockRange
+        # but to be safe and explicit for Elixir 1.15+:
+        elixir_range = range.from_number..range.to_number//-1
+
         if is_nil(range.priority) do
-          {priority_acc, [range.from_number..range.to_number | non_priority_acc], [range.id | delete_acc]}
+          {priority_acc, [elixir_range | non_priority_acc], [range.id | delete_acc]}
         else
-          {[range.from_number..range.to_number | priority_acc], non_priority_acc, [range.id | delete_acc]}
+          {[elixir_range | priority_acc], non_priority_acc, [range.id | delete_acc]}
         end
       end)
 
