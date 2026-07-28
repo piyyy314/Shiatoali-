@@ -123,6 +123,8 @@ defmodule BlockScoutWeb.Mixfile do
       {:mock, "~> 0.3.0", only: [:test], runtime: false},
       {:number, "~> 1.0.1"},
       {:phoenix, "== 1.8.3"},
+      {:phoenix_view, "~> 2.0"},
+      {:phoenix_template, "~> 1.0"},
       {:phoenix_ecto, "~> 4.1"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_html, "== 4.3.0"},
