@@ -143,7 +143,7 @@ defmodule EthereumJSONRPC.RollingWindow do
   defp full_windows_match_spec_matcher(window_count) do
     windows =
       3
-      |> Range.new(window_count)
+      |> Range.new(window_count, 1)
       |> Enum.map(&:"$#{&1}")
       |> Kernel.++([:_])
 
@@ -157,7 +157,7 @@ defmodule EthereumJSONRPC.RollingWindow do
   defp full_windows_match_spec_mapper(window_count) do
     windows =
       3
-      |> Range.new(window_count)
+      |> Range.new(window_count, 1)
       |> Enum.map(&:"$#{&1}")
 
     [{{:"$1", 0, [:"$2" | windows]}}]
