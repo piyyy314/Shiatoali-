@@ -209,7 +209,7 @@ defmodule Explorer.Chain.Optimism.TransactionBatch do
     {opos, output} = reassemble_eip4844_bytes(opos, encoded_byte0, encoded_byte1, encoded_byte2, encoded_byte3, output)
 
     {_opos, ipos, output} =
-      Enum.reduce_while(Range.new(1, @rounds - 1), {opos, ipos, output}, fn _i, {opos_acc, ipos_acc, output_acc} ->
+      Enum.reduce_while(Range.new(1, @rounds - 1, 1), {opos, ipos, output}, fn _i, {opos_acc, ipos_acc, output_acc} ->
         if opos_acc >= output_len do
           {:halt, {opos_acc, ipos_acc, output_acc}}
         else
