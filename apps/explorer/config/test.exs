@@ -125,6 +125,7 @@ config :explorer, Explorer.Tags.AddressTag.Cataloger, enabled: false
 config :explorer, Explorer.Market.Fetcher.Coin, enabled: false
 config :explorer, Explorer.Market.Fetcher.History, enabled: false
 config :explorer, Explorer.Market.Fetcher.Token, enabled: false
+config :explorer, Explorer.Chain.Health.Monitor, enabled: false
 
 config :explorer, Explorer.Market.Source,
   native_coin_history_source: Explorer.Market.Source.TestSource,
