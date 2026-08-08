@@ -1,5 +1,5 @@
 defmodule Explorer.SmartContract.Geas.PublisherTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   use Explorer.DataCase
 
