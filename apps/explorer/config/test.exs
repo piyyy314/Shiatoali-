@@ -122,4 +122,14 @@ config :explorer, Explorer.Chain.Fetcher.CheckBytecodeMatchingOnDemand, enabled:
 config :explorer, Explorer.Chain.Fetcher.FetchValidatorInfoOnDemand, enabled: false
 config :explorer, Explorer.Tags.AddressTag.Cataloger, enabled: false
 
+config :explorer, Explorer.Market.Fetcher.Coin, enabled: false
+config :explorer, Explorer.Market.Fetcher.History, enabled: false
+config :explorer, Explorer.Market.Fetcher.Token, enabled: false
+
+config :explorer, Explorer.Market.Source,
+  native_coin_history_source: Explorer.Market.Source.TestSource,
+  secondary_coin_history_source: Explorer.Market.Source.TestSource,
+  market_cap_history_source: Explorer.Market.Source.TestSource,
+  tvl_history_source: Explorer.Market.Source.TestSource
+
 config :tesla, adapter: Explorer.Mock.TeslaAdapter
