@@ -8,9 +8,23 @@ defmodule Explorer.MarketTest do
     Supervisor.terminate_child(Explorer.Supervisor, Explorer.Chain.Cache.Blocks.child_id())
     Supervisor.restart_child(Explorer.Supervisor, Explorer.Chain.Cache.Blocks.child_id())
 
+    Mox.stub(Explorer.Market.Source.TestSource, :fetch_native_coin_price_history, fn _ -> {:ok, []} end)
+    Mox.stub(Explorer.Market.Source.TestSource, :fetch_secondary_coin_price_history, fn _ -> {:ok, []} end)
+    Mox.stub(Explorer.Market.Source.TestSource, :fetch_market_cap_history, fn _ -> {:ok, []} end)
+    Mox.stub(Explorer.Market.Source.TestSource, :fetch_tvl_history, fn _ -> {:ok, []} end)
+
+    old_source_config = Application.get_env(:explorer, Explorer.Market.Source)
+    Application.put_env(:explorer, Explorer.Market.Source, [
+      native_coin_history_source: Explorer.Market.Source.TestSource,
+      secondary_coin_history_source: Explorer.Market.Source.TestSource,
+      market_cap_history_source: Explorer.Market.Source.TestSource,
+      tvl_history_source: Explorer.Market.Source.TestSource
+    ])
+
     on_exit(fn ->
       Supervisor.terminate_child(Explorer.Supervisor, Explorer.Chain.Cache.Blocks.child_id())
       Supervisor.restart_child(Explorer.Supervisor, Explorer.Chain.Cache.Blocks.child_id())
+      Application.put_env(:explorer, Explorer.Market.Source, old_source_config)
     end)
 
     :ok
