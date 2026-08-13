@@ -116,3 +116,5 @@ config :explorer, Explorer.Chain.Fetcher.FetchValidatorInfoOnDemand, enabled: fa
 config :explorer, Explorer.Tags.AddressTag.Cataloger, enabled: false
 
 config :tesla, adapter: Explorer.Mock.TeslaAdapter
+
+config :explorer, Explorer.Chain.Health.Monitor, enabled: false
