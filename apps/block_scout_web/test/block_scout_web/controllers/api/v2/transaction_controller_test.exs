@@ -661,7 +661,7 @@ defmodule BlockScoutWeb.API.V2.TransactionControllerTest do
       )
 
       internal_transactions =
-        51..1
+        51..1//-1
         |> Enum.map(fn index ->
           insert(:internal_transaction,
             transaction: transaction,
@@ -768,7 +768,7 @@ defmodule BlockScoutWeb.API.V2.TransactionControllerTest do
         |> with_block()
 
       logs =
-        50..0
+        50..0//-1
         |> Enum.map(fn index ->
           insert(:log,
             transaction: transaction,
