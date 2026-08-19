@@ -108,6 +108,7 @@ end
 config :explorer, Explorer.Repo.PolygonZkevm,
   database: database,
   hostname: hostname,
+  username: username,
   url: database_url,
   pool: Ecto.Adapters.SQL.Sandbox,
   # Default of `5_000` was too low for `BlockFetcher` test
