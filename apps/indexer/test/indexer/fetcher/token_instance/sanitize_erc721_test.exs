@@ -15,6 +15,20 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC721Test do
     setup do
       initial_env = Application.get_env(:indexer, Indexer.Fetcher.TokenInstance.SanitizeERC721)
 
+      stub(EthereumJSONRPC.Mox, :json_rpc, fn
+        requests, _options when is_list(requests) ->
+          {:ok,
+           Enum.map(requests, fn %{id: id} ->
+             %{
+               id: id,
+               error: %{code: -32000, message: "execution reverted"}
+             }
+           end)}
+
+        %{id: id}, _options ->
+          {:ok, %{id: id, result: "0x0"}}
+      end)
+
       on_exit(fn ->
         Application.put_env(:indexer, Indexer.Fetcher.TokenInstance.SanitizeERC721, initial_env)
       end)
@@ -23,16 +37,6 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC721Test do
     end
 
     test "imports token instances" do
-      stub(EthereumJSONRPC.Mox, :json_rpc, fn requests, _options ->
-        {:ok,
-         Enum.map(requests, fn %{id: id} ->
-           %{
-             id: id,
-             error: %{code: -32000, message: "execution reverted"}
-           }
-         end)}
-      end)
-
       for x <- 0..3 do
         erc_721_token = insert(:token, type: "ERC-721")
 
@@ -65,16 +69,6 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC721Test do
     end
 
     test "imports token instances with low tokens queue size", %{initial_env: initial_env} do
-      stub(EthereumJSONRPC.Mox, :json_rpc, fn requests, _options ->
-        {:ok,
-         Enum.map(requests, fn %{id: id} ->
-           %{
-             id: id,
-             error: %{code: -32000, message: "execution reverted"}
-           }
-         end)}
-      end)
-
       tokens =
         for x <- 0..5 do
           erc_721_token = insert(:token, type: "ERC-721")
