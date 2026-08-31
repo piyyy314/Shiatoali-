@@ -1,9 +1,11 @@
 defmodule Explorer.SmartContract.Solidity.CodeCompilerTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   use Utils.CompileTimeEnvHelper, chain_type: [:explorer, :chain_type]
 
   if @chain_type == :default do
+    doctest Explorer.SmartContract.Solidity.CodeCompiler
+
     @moduletag timeout: :infinity
 
     alias Explorer.Factory
@@ -14,8 +16,6 @@ defmodule Explorer.SmartContract.Solidity.CodeCompilerTest do
                     |> Jason.decode!()
 
     describe "run/2" do
-      doctest Explorer.SmartContract.Solidity.CodeCompiler
-
       setup do
         configuration = Application.get_env(:explorer, Explorer.SmartContract.RustVerifierInterfaceBehaviour)
         Application.put_env(:explorer, Explorer.SmartContract.RustVerifierInterfaceBehaviour, enabled: false)
