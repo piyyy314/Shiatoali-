@@ -1,5 +1,5 @@
 defmodule BlockScoutWeb.ViewingTokensTest do
-  use BlockScoutWeb.FeatureCase, async: true
+  use BlockScoutWeb.FeatureCase, async: false
 
   alias BlockScoutWeb.TokenPage
 
