@@ -884,7 +884,7 @@ defmodule BlockScoutWeb.API.V2.BlockControllerTest do
       )
 
       internal_transactions =
-        51..1
+        51..1//-1
         |> Enum.map(fn index ->
           transaction =
             :transaction
