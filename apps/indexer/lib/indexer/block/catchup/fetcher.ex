@@ -299,7 +299,7 @@ defmodule Indexer.Block.Catchup.Fetcher do
           {:cont, number..number}
 
         number, first..last//_ when number == last - 1 ->
-          {:cont, first..number}
+          {:cont, first..number//-1}
 
         number, range ->
           {:cont, range, number..number}

@@ -3,9 +3,9 @@ defmodule Explorer.SmartContract.Solidity.CodeCompilerTest do
 
   use Utils.CompileTimeEnvHelper, chain_type: [:explorer, :chain_type]
 
-  if @chain_type == :default do
-    doctest Explorer.SmartContract.Solidity.CodeCompiler
+  doctest Explorer.SmartContract.Solidity.CodeCompiler
 
+  if @chain_type == :default do
     @moduletag timeout: :infinity
 
     alias Explorer.Factory
