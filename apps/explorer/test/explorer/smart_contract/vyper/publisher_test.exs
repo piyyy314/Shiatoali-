@@ -12,7 +12,7 @@ if Application.compile_env(:explorer, :chain_type) !== :zksync do
     alias Explorer.Factory
     alias Explorer.SmartContract.Vyper.Publisher
 
-    setup do
+    setup_all do
       configuration = Application.get_env(:explorer, Explorer.SmartContract.RustVerifierInterfaceBehaviour)
       Application.put_env(:explorer, Explorer.SmartContract.RustVerifierInterfaceBehaviour, enabled: false)
       Application.put_env(:tesla, :adapter, Tesla.Adapter.Mint)
@@ -21,6 +21,8 @@ if Application.compile_env(:explorer, :chain_type) !== :zksync do
         Application.put_env(:explorer, Explorer.SmartContract.RustVerifierInterfaceBehaviour, configuration)
         Application.put_env(:tesla, :adapter, Explorer.Mock.TeslaAdapter)
       end)
+
+      :ok
     end
 
     describe "publish/2" do

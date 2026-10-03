@@ -16,7 +16,7 @@ defmodule Explorer.SmartContract.Solidity.CodeCompilerTest do
                     |> Jason.decode!()
 
     describe "run/2" do
-      setup do
+      setup_all do
         configuration = Application.get_env(:explorer, Explorer.SmartContract.RustVerifierInterfaceBehaviour)
         Application.put_env(:explorer, Explorer.SmartContract.RustVerifierInterfaceBehaviour, enabled: false)
         Application.put_env(:tesla, :adapter, Tesla.Adapter.Mint)
@@ -26,6 +26,10 @@ defmodule Explorer.SmartContract.Solidity.CodeCompilerTest do
           Application.put_env(:tesla, :adapter, Explorer.Mock.TeslaAdapter)
         end)
 
+        :ok
+      end
+
+      setup do
         {:ok,
          contract_code_info: Factory.contract_code_info(),
          contract_code_info_modern_compiler: Factory.contract_code_info_modern_compiler()}

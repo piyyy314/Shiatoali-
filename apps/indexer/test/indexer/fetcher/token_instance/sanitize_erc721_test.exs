@@ -37,7 +37,6 @@ defmodule Indexer.Fetcher.TokenInstance.SanitizeERC721Test do
     end
 
     test "imports token instances" do
-
       for x <- 0..3 do
         erc_721_token = insert(:token, type: "ERC-721")
 
