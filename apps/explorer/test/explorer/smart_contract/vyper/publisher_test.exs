@@ -1,6 +1,6 @@
 if Application.compile_env(:explorer, :chain_type) !== :zksync do
   defmodule Explorer.SmartContract.Vyper.PublisherTest do
-    use ExUnit.Case, async: true
+    use ExUnit.Case, async: false
 
     use Explorer.DataCase
 
