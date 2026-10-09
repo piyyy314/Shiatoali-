@@ -18,11 +18,17 @@ defmodule BlockScoutWeb do
   """
   def version(), do: Application.get_env(:block_scout_web, :version)
 
+  @doc """
+  Returns the quoted setup used by `use BlockScoutWeb, :controller`.
+
+  Configures Phoenix controllers for HTML and JSON with shared helpers and aliases,
+  and sets the HTML layout to `BlockScoutWeb.LayoutView`'s `:app` template.
+  """
   def controller do
     quote do
       use Phoenix.Controller, formats: [html: "View", json: "View"]
 
-      plug :put_layout, html: BlockScoutWeb.LayoutView
+      plug(:put_layout, html: {BlockScoutWeb.LayoutView, :app})
 
       import BlockScoutWeb.Controller
       import BlockScoutWeb.Router.Helpers
