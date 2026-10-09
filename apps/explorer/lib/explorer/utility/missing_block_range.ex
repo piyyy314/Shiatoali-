@@ -449,7 +449,7 @@ defmodule Explorer.Utility.MissingBlockRange do
     else
       full_range_map_set =
         from
-        |> Range.new(to)
+        |> Range.new(to, 1)
         |> Enum.to_list()
         |> MapSet.new()
 
@@ -457,7 +457,7 @@ defmodule Explorer.Utility.MissingBlockRange do
       |> Enum.reduce(full_range_map_set, fn range, acc ->
         map_set =
           range.from_number
-          |> Range.new(range.to_number)
+          |> Range.new(range.to_number, 1)
           |> Enum.to_list()
           |> MapSet.new()
 
@@ -472,7 +472,7 @@ defmodule Explorer.Utility.MissingBlockRange do
         else
           # credo:disable-for-next-line Credo.Check.Refactor.Nesting
           if end_range - num > 1 do
-            {[Range.new(start_range, end_range) | ranges], {num, num}}
+            {[Range.new(start_range, end_range, 1) | ranges], {num, num}}
           else
             {ranges, {start_range, num}}
           end
@@ -480,7 +480,7 @@ defmodule Explorer.Utility.MissingBlockRange do
       end)
       |> then(fn {ranges, {start_range, end_range}} ->
         if not is_nil(start_range) && not is_nil(end_range) do
-          [Range.new(start_range, end_range) | ranges]
+          [Range.new(start_range, end_range, 1) | ranges]
         else
           ranges
         end
@@ -583,9 +583,17 @@ defmodule Explorer.Utility.MissingBlockRange do
     |> Enum.sort_by(& &1.from_number, &>=/2)
     |> Enum.reduce({nil, []}, fn %{from_number: from, to_number: to}, {last_range, result} ->
       cond do
-        is_nil(last_range) -> {from..to, result}
-        Range.disjoint?(from..to, last_range) -> {from..to, [last_range | result]}
-        true -> {Range.new(max(from, last_range.first), min(to, last_range.last)), result}
+        is_nil(last_range) ->
+          {from..to, result}
+
+        Range.disjoint?(from..to, last_range) ->
+          {from..to, [last_range | result]}
+
+        true ->
+          first = max(from, last_range.first)
+          last = min(to, last_range.last)
+          step = if last < first, do: -1, else: 1
+          {Range.new(first, last, step), result}
       end
     end)
   end

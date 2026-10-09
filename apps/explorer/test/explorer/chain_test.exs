@@ -2038,9 +2038,8 @@ defmodule Explorer.ChainTest do
 
     # 1111
     test "0..0 with blocks 0..3" do
-      Enum.each(0..2, fn num ->
+      Enum.each(0..3, fn num ->
         insert(:block, number: num)
-        Process.sleep(200)
       end)
 
       assert Chain.missing_block_number_ranges(0..0) == []
