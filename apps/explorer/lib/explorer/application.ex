@@ -102,7 +102,7 @@ defmodule Explorer.Application do
       )
     ]
 
-    children = base_children ++ configurable_children()
+    children = [base_children, configurable_children()] |> List.flatten()
 
     opts = [strategy: :one_for_one, name: Explorer.Supervisor, max_restarts: 1_000]
 
