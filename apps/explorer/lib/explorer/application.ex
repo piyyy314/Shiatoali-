@@ -71,7 +71,7 @@ defmodule Explorer.Application do
       Supervisor.child_spec({Task.Supervisor, name: Explorer.WETHMigratorSupervisor}, id: WETHMigratorSupervisor),
       Explorer.SmartContract.SolcDownloader,
       Explorer.SmartContract.VyperDownloader,
-      Explorer.Chain.Health.Monitor,
+      configure_health_monitor(),
       {Registry, keys: :duplicate, name: Registry.ChainEvents, id: Registry.ChainEvents},
       {Admin.Recovery, [[], [name: Admin.Recovery]]},
       Accounts,
@@ -102,7 +102,7 @@ defmodule Explorer.Application do
       )
     ]
 
-    children = base_children ++ configurable_children()
+    children = [base_children, configurable_children()] |> List.flatten()
 
     opts = [strategy: :one_for_one, name: Explorer.Supervisor, max_restarts: 1_000]
 
@@ -358,6 +358,14 @@ defmodule Explorer.Application do
         Explorer.Repo.Zilliqa,
         Explorer.Repo.ZkSync
       ]
+    else
+      []
+    end
+  end
+
+  defp configure_health_monitor do
+    if Application.get_env(:explorer, Explorer.Chain.Health.Monitor)[:enabled] != false do
+      Explorer.Chain.Health.Monitor
     else
       []
     end
