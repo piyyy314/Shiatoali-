@@ -1498,8 +1498,8 @@ defmodule Explorer.Chain do
   end
 
   defp block_ranges_extend(block_ranges, block_range_start, block_range_end) do
-    # credo:disable-for-next-line
-    block_ranges ++ [Range.new(block_range_start, block_range_end)]
+    step = if block_range_end < block_range_start, do: -1, else: 1
+    [Range.new(block_range_start, block_range_end, step) | block_ranges]
   end
 
   @doc """

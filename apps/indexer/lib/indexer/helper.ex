@@ -253,14 +253,14 @@ defmodule Indexer.Helper do
       [1..3, 4..6, 7..9, 10..10]
   """
   @spec range_chunk_every(Range.t(), non_neg_integer()) :: Enum.t()
-  def range_chunk_every(from..to//_, chunk_size) do
+  def range_chunk_every(from..to//step, chunk_size) do
     chunks_number = floor((to - from + 1) / chunk_size)
 
-    0..chunks_number
+    0..chunks_number//1
     |> Stream.map(fn current_chunk ->
       chunk_start = from + chunk_size * current_chunk
       chunk_end = min(chunk_start + chunk_size - 1, to)
-      chunk_start..chunk_end
+      chunk_start..chunk_end//step
     end)
   end
 

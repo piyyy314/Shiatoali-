@@ -186,7 +186,7 @@ defmodule Indexer.Fetcher.Zilliqa.Zrc2Tokens do
       logs = Zrc2TokenTransfer.read_block_logs(block_number_to_analyze, transfer_events)
       transactions = Zrc2TokenTransfer.read_transfer_transactions(logs, @zrc2_transfer_success_event)
 
-      block_numbers_to_analyze = Range.new(block_number_to_analyze, block_number_to_analyze)
+      block_numbers_to_analyze = Range.new(block_number_to_analyze, block_number_to_analyze, 1)
 
       fetch_zrc2_token_transfers_and_adapters(logs, transactions, block_numbers_to_analyze, __MODULE__)
       move_zrc2_token_transfers_to_token_transfers()
