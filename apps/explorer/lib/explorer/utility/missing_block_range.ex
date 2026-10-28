@@ -449,7 +449,7 @@ defmodule Explorer.Utility.MissingBlockRange do
     else
       full_range_map_set =
         from
-        |> Range.new(to, 1)
+        |> Range.new(to, -1)
         |> Enum.to_list()
         |> MapSet.new()
 
@@ -457,7 +457,7 @@ defmodule Explorer.Utility.MissingBlockRange do
       |> Enum.reduce(full_range_map_set, fn range, acc ->
         map_set =
           range.from_number
-          |> Range.new(range.to_number, 1)
+          |> Range.new(range.to_number, -1)
           |> Enum.to_list()
           |> MapSet.new()
 
