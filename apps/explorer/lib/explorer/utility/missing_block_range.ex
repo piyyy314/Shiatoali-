@@ -242,7 +242,7 @@ defmodule Explorer.Utility.MissingBlockRange do
   @spec delete_less_priority_range(__MODULE__.t(), integer() | nil) :: any()
   defp delete_less_priority_range(range, priority) do
     if is_nil(range.priority) && not is_nil(priority) do
-      delete_range(range.from_number..range.to_number)
+      delete_range(range.from_number..range.to_number//-1)
     end
   end
 

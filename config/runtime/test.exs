@@ -16,9 +16,14 @@ config :block_scout_web, BlockScoutWeb.API.V2, enabled: true
 ### Explorer ###
 ################
 
+config :explorer, Explorer.Chain.Cache.Counters.AverageBlockTime, enabled: false
+
 config :explorer, Explorer.Chain.Cache.Counters.Transactions24hCount,
+  enabled: false,
   cache_period: ConfigHelper.parse_time_env_var("CACHE_TRANSACTIONS_24H_STATS_PERIOD", "1h"),
   enable_consolidation: false
+
+config :explorer, Explorer.Chain.Cache.Counters.NewPendingTransactionsCount, enabled: false
 
 variant = Variant.get()
 

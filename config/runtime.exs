@@ -394,7 +394,7 @@ config :explorer, Explorer.Chain.Cache.Counters.TokenTransfersCount,
   cache_period: ConfigHelper.parse_time_env_var("CACHE_TOKEN_TRANSFERS_COUNTER_PERIOD", "1h")
 
 config :explorer, Explorer.Chain.Cache.Counters.AverageBlockTime,
-  enabled: true,
+  enabled: config_env() != :test,
   period: :timer.minutes(10),
   cache_period: ConfigHelper.parse_time_env_var("CACHE_AVERAGE_BLOCK_PERIOD", "30m"),
   num_of_blocks: ConfigHelper.parse_integer_env_var("CACHE_AVERAGE_BLOCK_TIME_WINDOW", 100)
@@ -417,12 +417,12 @@ config :explorer, Explorer.Chain.Cache.Counters.Optimism.LastOutputRootSizeCount
   cache_period: ConfigHelper.parse_time_env_var("CACHE_OPTIMISM_LAST_OUTPUT_ROOT_SIZE_COUNTER_PERIOD", "5m")
 
 config :explorer, Explorer.Chain.Cache.Counters.Transactions24hCount,
-  enabled: true,
+  enabled: config_env() != :test,
   cache_period: ConfigHelper.parse_time_env_var("CACHE_TRANSACTIONS_24H_STATS_PERIOD", "1h"),
   enable_consolidation: true
 
 config :explorer, Explorer.Chain.Cache.Counters.NewPendingTransactionsCount,
-  enabled: true,
+  enabled: config_env() != :test,
   cache_period: ConfigHelper.parse_time_env_var("CACHE_FRESH_PENDING_TRANSACTIONS_COUNTER_PERIOD", "5m"),
   enable_consolidation: true
 
