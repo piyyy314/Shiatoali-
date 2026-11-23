@@ -884,12 +884,19 @@ defmodule BlockScoutWeb.API.RPC.ContractControllerTest do
     end
 
     test "verify already verified contract", %{conn: conn} do
-      _response = verify(conn)
+      address = insert(:address, contract_code: "0x608060405234", verified: true)
+
+      insert(:smart_contract,
+        address_hash: address.hash,
+        contract_code_md5: "123",
+        verified_via_sourcify: true,
+        partially_verified: false
+      )
 
       params = %{
         "module" => "contract",
         "action" => "verify_via_sourcify",
-        "addressHash" => "0xf26594F585De4EB0Ae9De865d9053FEe02ac6eF1"
+        "addressHash" => to_string(address.hash)
       }
 
       response =
