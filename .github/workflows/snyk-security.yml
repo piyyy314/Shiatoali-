@@ -1,80 +1,74 @@
-uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
+name: Snyk Security
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  snyk:
+    name: Snyk vulnerability and code scans
+    runs-on: ubuntu-latest
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    steps:
+      - name: Check Snyk token
+        id: token
+        shell: bash
+        run: |
+          if [[ -n "${SNYK_TOKEN:-}" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Snyk scans skipped because the SNYK_TOKEN repository secret is not configured."
+          fi
 
+      - name: Checkout repository
+        if: steps.token.outputs.configured == 'true'
+        uses: actions/checkout@v4
 
-# For Snyk Open Source you must first set up the development environment for your application's dependencies
-# For example for Node
-#- uses: actions/setup-node@v4
-# with:
-# node-version: 20
+      - name: Set up Node.js
+        if: steps.token.outputs.configured == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
+      - name: Install Snyk CLI
+        if: steps.token.outputs.configured == 'true'
+        run: npm install --global snyk
 
-env:
-# This is where you will need to introduce the Snyk API token created with your Snyk account
-SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Snyk Open Source test
+        if: steps.token.outputs.configured == 'true'
+        continue-on-error: true
+        run: snyk test --all-projects --severity-threshold=high
 
+      - name: Snyk Code test
+        id: snyk_code
+        if: steps.token.outputs.configured == 'true'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          snyk code test --sarif > snyk-code.sarif
+          status=$?
+          if [[ -s snyk-code.sarif ]]; then
+            echo "sarif_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "sarif_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+          exit "$status"
 
-# Runs Snyk Code (SAST) analysis and uploads result into GitHub.
-# Use || true to not fail the pipeline
-- name: Snyk Code test
-run: snyk code test --sarif > snyk-code.sarif # || true
+      - name: Upload Snyk Code results
+        if: steps.snyk_code.outputs.sarif_exists == 'true'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk-code.sarif
 
-
-# Runs Snyk Open Source (SCA) analysis and uploads result to Snyk.
-- name: Snyk Open Source monitor
-run: snyk monitor --all-projects
-
-
-# Runs Snyk Infrastructure as Code (IaC) analysis and uploads result to Snyk.
-# Use || true to not fail the pipeline.
-- name: Snyk IaC test and report
-run: snyk iac test --report # || true
-
-
-# Build the docker image for testing
-- name: Build a Docker image
-run: docker build -t your/image-to-test .
-# Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
-- name: Snyk Container monitor
-run: snyk container monitor your/image-to-test --file=Dockerfile
-
-
-# Push the Snyk Code results into GitHub Code Scanning tab
-- name: Upload result to GitHub Code Scanning
-uses: github/codeql-action/upload-sarif@v3
-with:
-sarif_file: snyk-code - name: Cache
-uses: actions/cache@v5.0.5
-with:
-# A list of files, directories, and wildcard patterns to cache and restore
-path:
-# An explicit key for restoring and saving the cache
-key:
-# An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.
-restore-keys: # optional
-# The chunk size used to split up large files during upload, in bytes
-upload-chunk-size: # optional
-# An optional boolean when enabled, allows windows runners to save or restore caches that can be restored or saved respectively on other platforms
-enableCrossOsArchive: # optional, default is false
-# Fail the workflow if cache entry is not found
-fail-on-cache-miss: # optional, default is false
-# Check if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache
-lookup-only: # optional, default is false
-# Run the post step to save the cache even if another step before fails
-save-always: # optional, default is false
-Cache
-uses: actions/cache@v5.0.1
-with:
-# A list of files, directories, and wildcard patterns to cache and restore
-path:
-# An explicit key for restoring and saving the cache
-key:
-# An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.
-restore-keys: # optional
-# The chunk size used to split up large files during upload, in bytes
-upload-chunk-size: # optional
-# An optional boolean when enabled, allows windows runners to save or restore caches that can be restored or saved respectively on other platforms
-enableCrossOsArchive: # optional, default is false
-# Fail the workflow if cache entry is not found
-fail-on-cache-miss: # optional, default is false
-# Check if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache
-lookup-only: # optional, default is false
+      - name: Snyk Infrastructure as Code test
+        if: steps.token.outputs.configured == 'true'
+        continue-on-error: true
+        run: snyk iac test --severity-threshold=high
