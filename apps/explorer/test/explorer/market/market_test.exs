@@ -1,3 +1,12 @@
+defmodule Explorer.Market.Source.NoopHistory do
+  @moduledoc false
+
+  def fetch_native_coin_price_history(_day_count), do: :ignore
+  def fetch_secondary_coin_price_history(_day_count), do: :ignore
+  def fetch_market_cap_history(_day_count), do: :ignore
+  def fetch_tvl_history(_day_count), do: :ignore
+end
+
 defmodule Explorer.MarketTest do
   use Explorer.DataCase, async: false
 
@@ -19,6 +28,25 @@ defmodule Explorer.MarketTest do
   describe "fetch_recent_history/1" do
     test "with enabled history fetcher" do
       ConCache.delete(:market_history, :last_update)
+
+      # The test only verifies reading persisted history. Keep the background
+      # fetcher deterministic and prevent real CryptoCompare/market-data calls.
+      old_source_env = Application.get_env(:explorer, Explorer.Market.Source)
+
+      Application.put_env(
+        :explorer,
+        Explorer.Market.Source,
+        Keyword.merge(old_source_env,
+          native_coin_history_source: Explorer.Market.Source.NoopHistory,
+          secondary_coin_history_source: Explorer.Market.Source.NoopHistory,
+          market_cap_history_source: Explorer.Market.Source.NoopHistory,
+          tvl_history_source: Explorer.Market.Source.NoopHistory
+        )
+      )
+
+      on_exit(fn ->
+        Application.put_env(:explorer, Explorer.Market.Source, old_source_env)
+      end)
 
       start_supervised!(Explorer.Market.Fetcher.History)
       start_supervised!(Explorer.Market)
