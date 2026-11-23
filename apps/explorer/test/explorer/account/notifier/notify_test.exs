@@ -18,10 +18,8 @@ defmodule Explorer.Account.Notifier.NotifyTest do
       ]
     )
 
-    Application.put_env(:explorer, Explorer.Mailer,
-      adapter: Bamboo.SendGridAdapter,
-      api_key: "SENDGRID_API_KEY"
-    )
+    # Notification persistence tests must not call the real SendGrid API.
+    Application.put_env(:explorer, Explorer.Mailer, adapter: Bamboo.TestAdapter)
 
     Application.put_env(
       :ueberauth,
