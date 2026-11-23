@@ -1,4 +1,4 @@
-name: Snyk Security
+name: Snyk and Independent SAST Security
 
 on:
   push:
@@ -174,12 +174,13 @@ jobs:
               extra = item.get("extra") or {}
               metadata = extra.get("metadata") or {}
               severity = str(extra.get("severity", "")).upper()
-              score = metadata.get("security-severity", 0)
+              raw_score = metadata.get("security-severity", 0)
+              severity_label = str(raw_score).upper()
               try:
-                  score = float(score)
+                  score = float(raw_score)
               except (TypeError, ValueError):
                   score = 0
-              return severity == "ERROR" or str(score).upper() in {"HIGH", "CRITICAL"} or score >= 7.0
+              return severity == "ERROR" or severity_label in {"HIGH", "CRITICAL"} or score >= 7.0
 
           high = [item for item in findings if high_or_critical(item)]
           print(f"Semgrep completed: {len(findings)} findings, {len(high)} high/critical.")
@@ -217,5 +218,6 @@ jobs:
             echo "## Snyk security scan: SKIPPED"
             echo ""
             echo "No Snyk Open Source, Code, or IaC scan was performed because SNYK_TOKEN is unavailable."
-            echo "This is not a successful scan. Configure the secret or use the documented alternative scanners."
+            echo "This is not a successful scan. Configure the secret or use the documented alternative scanner."
           } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
