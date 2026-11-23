@@ -1,80 +1,223 @@
-uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
+name: Snyk and Independent SAST Security
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  check-snyk-token:
+    name: Check Snyk credential availability
+    runs-on: ubuntu-latest
+    outputs:
+      configured: ${{ steps.check.outputs.configured }}
+    steps:
+      - name: Check SNYK_TOKEN without exposing its value
+        id: check
+        shell: bash
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          if [[ -n "${SNYK_TOKEN:-}" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  snyk:
+    name: Snyk vulnerability and code scans
+    needs: check-snyk-token
+    if: needs.check-snyk-token.outputs.configured == 'true'
+    runs-on: ubuntu-latest
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Snyk CLI
+        run: npm install --global snyk
+
+      - name: Snyk Open Source test
+        id: snyk_open_source
+        continue-on-error: true
+        run: snyk test --all-projects --severity-threshold=high
+
+      - name: Snyk Code test
+        id: snyk_code
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          snyk code test --sarif > snyk-code.sarif
+          status=$?
+          if [[ -s snyk-code.sarif ]]; then
+            echo "sarif_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "sarif_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+          exit "$status"
+
+      - name: Upload Snyk Code results
+        if: always() && steps.snyk_code.outputs.sarif_exists == 'true'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk-code.sarif
+
+      - name: Snyk Infrastructure as Code test
+        id: snyk_iac
+        continue-on-error: true
+        run: snyk iac test --severity-threshold=high
+
+      - name: Enforce Snyk scan outcomes
+        if: always()
+        env:
+          OPEN_SOURCE_OUTCOME: ${{ steps.snyk_open_source.outcome }}
+          CODE_OUTCOME: ${{ steps.snyk_code.outcome }}
+          IAC_OUTCOME: ${{ steps.snyk_iac.outcome }}
+        shell: bash
+        run: |
+          failed=0
+          for item in "OPEN_SOURCE:$OPEN_SOURCE_OUTCOME" "CODE:$CODE_OUTCOME" "IAC:$IAC_OUTCOME"; do
+            scanner="${item%%:*}"
+            outcome="${item#*:}"
+            echo "Snyk $scanner: $outcome"
+            if [[ "$outcome" != "success" ]]; then
+              echo "::error::Snyk $scanner scan did not complete successfully (outcome: $outcome)."
+              failed=1
+            fi
+          done
+          if [[ "$failed" -ne 0 ]]; then
+            echo "Snyk scan is failed or incomplete; it must not be reported as a successful security scan."
+            exit 1
+          fi
+          echo "All configured Snyk scans completed successfully."
 
 
-# For Snyk Open Source you must first set up the development environment for your application's dependencies
-# For example for Node
-#- uses: actions/setup-node@v4
-# with:
-# node-version: 20
+  semgrep-fallback:
+    name: Semgrep OSS independent SAST fallback
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-env:
-# This is where you will need to introduce the Snyk API token created with your Snyk account
-SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Install Semgrep OSS
+        run: |
+          python -m venv "$RUNNER_TEMP/semgrep-venv"
+          "$RUNNER_TEMP/semgrep-venv/bin/python" -m pip install --disable-pip-version-check semgrep==1.186.0
+          echo "$RUNNER_TEMP/semgrep-venv/bin" >> "$GITHUB_PATH"
 
+      - name: Run independent Semgrep scan
+        id: semgrep
+        continue-on-error: true
+        run: |
+          semgrep scan \
+            --config p/python \
+            --config p/javascript \
+            --config p/security-audit \
+            --metrics=off \
+            --timeout 60 \
+            --json --output semgrep-report.json \
+            --exclude node_modules --exclude deps --exclude _build --exclude priv/static \
+            .
 
-# Runs Snyk Code (SAST) analysis and uploads result into GitHub.
-# Use || true to not fail the pipeline
-- name: Snyk Code test
-run: snyk code test --sarif > snyk-code.sarif # || true
+      - name: Enforce Semgrep report and high-severity findings
+        if: always()
+        env:
+          SCAN_OUTCOME: ${{ steps.semgrep.outcome }}
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
 
+          path = Path("semgrep-report.json")
+          if not path.is_file():
+              print("Semgrep report missing; fallback scan is incomplete.", file=sys.stderr)
+              sys.exit(1)
+          try:
+              report = json.loads(path.read_text(encoding="utf-8"))
+          except (OSError, json.JSONDecodeError) as exc:
+              print(f"Semgrep report unavailable or invalid: {exc}", file=sys.stderr)
+              sys.exit(1)
+          errors = report.get("errors") or []
+          if errors:
+              for error in errors:
+                  print(f"Semgrep scan error: {error}", file=sys.stderr)
+              sys.exit(1)
+          findings = report.get("results")
+          if not isinstance(findings, list):
+              print("Semgrep report has no results list.", file=sys.stderr)
+              sys.exit(1)
 
-# Runs Snyk Open Source (SCA) analysis and uploads result to Snyk.
-- name: Snyk Open Source monitor
-run: snyk monitor --all-projects
+          def high_or_critical(item):
+              extra = item.get("extra") or {}
+              metadata = extra.get("metadata") or {}
+              severity = str(extra.get("severity", "")).upper()
+              raw_score = metadata.get("security-severity", 0)
+              severity_label = str(raw_score).upper()
+              try:
+                  score = float(raw_score)
+              except (TypeError, ValueError):
+                  score = 0
+              return severity == "ERROR" or severity_label in {"HIGH", "CRITICAL"} or score >= 7.0
 
+          high = [item for item in findings if high_or_critical(item)]
+          print(f"Semgrep completed: {len(findings)} findings, {len(high)} high/critical.")
+          for item in high:
+              extra = item.get("extra") or {}
+              print(f"HIGH: {item.get('path')}:{item.get('start', {}).get('line')} {item.get('check_id')} — {extra.get('message', '')}")
+          if high:
+              sys.exit(1)
+          if "${SCAN_OUTCOME}" != "success":
+              print("Semgrep scanner did not complete successfully.", file=sys.stderr)
+              sys.exit(1)
+          print("Semgrep OSS fallback completed without high/critical findings.")
+          PY
 
-# Runs Snyk Infrastructure as Code (IaC) analysis and uploads result to Snyk.
-# Use || true to not fail the pipeline.
-- name: Snyk IaC test and report
-run: snyk iac test --report # || true
+      - name: Upload Semgrep report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-oss-report
+          path: semgrep-report.json
+          if-no-files-found: warn
+          retention-days: 7
 
-
-# Build the docker image for testing
-- name: Build a Docker image
-run: docker build -t your/image-to-test .
-# Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
-- name: Snyk Container monitor
-run: snyk container monitor your/image-to-test --file=Dockerfile
-
-
-# Push the Snyk Code results into GitHub Code Scanning tab
-- name: Upload result to GitHub Code Scanning
-uses: github/codeql-action/upload-sarif@v3
-with:
-sarif_file: snyk-code - name: Cache
-uses: actions/cache@v5.0.5
-with:
-# A list of files, directories, and wildcard patterns to cache and restore
-path:
-# An explicit key for restoring and saving the cache
-key:
-# An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.
-restore-keys: # optional
-# The chunk size used to split up large files during upload, in bytes
-upload-chunk-size: # optional
-# An optional boolean when enabled, allows windows runners to save or restore caches that can be restored or saved respectively on other platforms
-enableCrossOsArchive: # optional, default is false
-# Fail the workflow if cache entry is not found
-fail-on-cache-miss: # optional, default is false
-# Check if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache
-lookup-only: # optional, default is false
-# Run the post step to save the cache even if another step before fails
-save-always: # optional, default is false
-Cache
-uses: actions/cache@v5.0.1
-with:
-# A list of files, directories, and wildcard patterns to cache and restore
-path:
-# An explicit key for restoring and saving the cache
-key:
-# An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.
-restore-keys: # optional
-# The chunk size used to split up large files during upload, in bytes
-upload-chunk-size: # optional
-# An optional boolean when enabled, allows windows runners to save or restore caches that can be restored or saved respectively on other platforms
-enableCrossOsArchive: # optional, default is false
-# Fail the workflow if cache entry is not found
-fail-on-cache-miss: # optional, default is false
-# Check if a cache entry exists for the given input(s) (key, restore-keys) without downloading the cache
-lookup-only: # optional, default is false
+  snyk-not-configured:
+    name: Snyk scan unavailable (credential missing)
+    needs: check-snyk-token
+    if: needs.check-snyk-token.outputs.configured != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report explicit skipped status
+        shell: bash
+        run: |
+          echo "::warning::Snyk scans were skipped because the SNYK_TOKEN repository secret is not configured."
+          {
+            echo "## Snyk security scan: SKIPPED"
+            echo ""
+            echo "No Snyk Open Source, Code, or IaC scan was performed because SNYK_TOKEN is unavailable."
+            echo "This is not a successful scan. Configure the secret or use the documented alternative scanner."
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
