@@ -62,6 +62,12 @@ defmodule BlockScoutWeb.API.V2.StatsController do
       end
 
     exchange_rate = Market.get_coin_exchange_rate()
+
+    average_block_time_ms =
+      case AverageBlockTime.average_block_time() do
+        {:error, :disabled} -> 0
+        %Duration{} = duration -> Duration.to_milliseconds(duration)
+      end
     secondary_coin_exchange_rate = Market.get_secondary_coin_exchange_rate()
 
     transaction_stats = Helper.get_transaction_stats()
@@ -98,7 +104,7 @@ defmodule BlockScoutWeb.API.V2.StatsController do
         "total_blocks" => BlocksCount.get() |> to_string(),
         "total_addresses" => AddressesCount.fetch() |> to_string(),
         "total_transactions" => TransactionsCount.get() |> to_string(),
-        "average_block_time" => AverageBlockTime.average_block_time() |> Duration.to_milliseconds(),
+        "average_block_time" => average_block_time_ms,
         "coin_image" => exchange_rate.image_url,
         "secondary_coin_image" => secondary_coin_exchange_rate.image_url,
         "coin_price" => exchange_rate.fiat_value,
