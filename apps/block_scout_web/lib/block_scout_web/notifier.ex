@@ -647,8 +647,14 @@ defmodule BlockScoutWeb.Notifier do
       average_block_time: average_block_time
     })
 
+    average_block_time_ms =
+      case average_block_time do
+        {:error, :disabled} -> 0
+        %Duration{} = duration -> Duration.to_milliseconds(duration)
+      end
+
     block_params_v2 = %{
-      average_block_time: to_string(Duration.to_milliseconds(average_block_time)),
+      average_block_time: to_string(average_block_time_ms),
       block:
         BlockView.render("block.json", %{
           block: preloaded_block,
