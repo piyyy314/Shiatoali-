@@ -105,6 +105,104 @@ jobs:
           fi
           echo "All configured Snyk scans completed successfully."
 
+
+  semgrep-fallback:
+    name: Semgrep OSS independent SAST fallback
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Semgrep OSS
+        run: |
+          python -m venv "$RUNNER_TEMP/semgrep-venv"
+          "$RUNNER_TEMP/semgrep-venv/bin/python" -m pip install --disable-pip-version-check semgrep==1.186.0
+          echo "$RUNNER_TEMP/semgrep-venv/bin" >> "$GITHUB_PATH"
+
+      - name: Run independent Semgrep scan
+        id: semgrep
+        continue-on-error: true
+        run: |
+          semgrep scan \
+            --config p/python \
+            --config p/javascript \
+            --config p/security-audit \
+            --metrics=off \
+            --timeout 60 \
+            --json --output semgrep-report.json \
+            --exclude node_modules --exclude deps --exclude _build --exclude priv/static \
+            .
+
+      - name: Enforce Semgrep report and high-severity findings
+        if: always()
+        env:
+          SCAN_OUTCOME: ${{ steps.semgrep.outcome }}
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          path = Path("semgrep-report.json")
+          if not path.is_file():
+              print("Semgrep report missing; fallback scan is incomplete.", file=sys.stderr)
+              sys.exit(1)
+          try:
+              report = json.loads(path.read_text(encoding="utf-8"))
+          except (OSError, json.JSONDecodeError) as exc:
+              print(f"Semgrep report unavailable or invalid: {exc}", file=sys.stderr)
+              sys.exit(1)
+          errors = report.get("errors") or []
+          if errors:
+              for error in errors:
+                  print(f"Semgrep scan error: {error}", file=sys.stderr)
+              sys.exit(1)
+          findings = report.get("results")
+          if not isinstance(findings, list):
+              print("Semgrep report has no results list.", file=sys.stderr)
+              sys.exit(1)
+
+          def high_or_critical(item):
+              extra = item.get("extra") or {}
+              metadata = extra.get("metadata") or {}
+              severity = str(extra.get("severity", "")).upper()
+              score = metadata.get("security-severity", 0)
+              try:
+                  score = float(score)
+              except (TypeError, ValueError):
+                  score = 0
+              return severity == "ERROR" or str(score).upper() in {"HIGH", "CRITICAL"} or score >= 7.0
+
+          high = [item for item in findings if high_or_critical(item)]
+          print(f"Semgrep completed: {len(findings)} findings, {len(high)} high/critical.")
+          for item in high:
+              extra = item.get("extra") or {}
+              print(f"HIGH: {item.get('path')}:{item.get('start', {}).get('line')} {item.get('check_id')} — {extra.get('message', '')}")
+          if high:
+              sys.exit(1)
+          if "${SCAN_OUTCOME}" != "success":
+              print("Semgrep scanner did not complete successfully.", file=sys.stderr)
+              sys.exit(1)
+          print("Semgrep OSS fallback completed without high/critical findings.")
+          PY
+
+      - name: Upload Semgrep report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-oss-report
+          path: semgrep-report.json
+          if-no-files-found: warn
+          retention-days: 7
+
   snyk-not-configured:
     name: Snyk scan unavailable (credential missing)
     needs: check-snyk-token
