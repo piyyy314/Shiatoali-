@@ -59,7 +59,7 @@ defmodule Explorer.Mixfile do
     [
       {:bamboo, "~> 2.5.0"},
       {:mime, "~> 2.0"},
-      {:bcrypt_elixir, "~> 3.0"},
+      {:bcrypt_elixir, "~> 4.0"},
       # benchmark optimizations
       {:benchee, "~> 1.5.0", only: :test},
       # CSV output for benchee
